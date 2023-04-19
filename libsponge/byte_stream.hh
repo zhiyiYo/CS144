@@ -15,8 +15,11 @@
 //! and then no more bytes can be written.
 class ByteStream {
   private:
-    // Your code here -- add private members as necessary.
-
+    size_t _capacity;
+    std::deque<char> _buffer{};
+    size_t _bytes_written{0};
+    size_t _bytes_read{0};
+    bool _is_input_end{false};
     bool _error{};  //!< Flag indicating that the stream suffered an error.
 
   public:
