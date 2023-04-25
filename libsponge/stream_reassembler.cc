@@ -25,7 +25,7 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
     if (eof)
         _is_eof = true;
 
-    if (eof && empty() && data.empty()) {
+    if (_is_eof && empty() && data.empty()) {
         _output.end_input();
         return;
     }
