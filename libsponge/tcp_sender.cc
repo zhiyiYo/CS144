@@ -88,6 +88,9 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
         _outstand_segments.pop();
     }
 
+    // 再次填满发送窗口
+    fill_window();
+
     // 如果还有没被确认的报文段就重启计时器
     if (!_outstand_segments.empty())
         _timer.start();
