@@ -34,7 +34,7 @@ void TCPSender::fill_window() {
         // 发送一个 SYN 包
         send_segment("", true);
     } else {
-        size_t remain_size = _window_size + _ack_seq - _next_seqno;
+        size_t remain_size = max(_window_size, static_cast<uint16_t>(1)) + _ack_seq - _next_seqno;
 
         // 当缓冲区中有待发送数据时就发送数据报文段
         while (remain_size > 0 && !_stream.buffer_empty()) {
