@@ -8,6 +8,33 @@
 
 #include <functional>
 #include <queue>
+#include <stdint.h>
+
+// 计时器
+class Timer {
+  private:
+    uint32_t _rto;
+    uint32_t _remain_time;
+    bool _is_running;
+
+  public:
+    Timer(uint32_t rto);
+
+    // 启动计时器
+    void start();
+
+    // 停止计时器
+    void stop();
+
+    // 是否超时
+    bool is_time_out();
+
+    // 设置过去的时间
+    void elapse(size_t eplased);
+
+    // 设置超时时间
+    void set_time_out(uint32_t duration);
+};
 
 //! \brief The "sender" part of a TCP implementation.
 
@@ -23,6 +50,9 @@ class TCPSender {
     //! outbound queue of segments that the TCPSender wants sent
     std::queue<TCPSegment> _segments_out{};
 
+    // 未被确认的报文段
+    std::queue<std::pair<TCPSegment, uint64_t>> _outstand_segments{};
+
     //! retransmission timer for the connection
     unsigned int _initial_retransmission_timeout;
 
@@ -31,6 +61,27 @@ class TCPSender {
 
     //! the (absolute) sequence number for the next byte to be sent
     uint64_t _next_seqno{0};
+
+    // ackno checkpoint
+    uint64_t _ack_seq{0};
+
+    // 连续重传次数
+    uint32_t _consecutive_retxs{0};
+
+    // 未被确认的序号长度
+    uint64_t _outstand_bytes{0};
+
+    // 接收方窗口长度
+    uint16_t _window_size{1};
+
+    // 是否同步
+    bool _is_syned{false};
+
+    // 是否结束
+    bool _is_fin{false};
+
+    // 计时器
+    Timer _timer;
 
   public:
     //! Initialize a TCPSender
@@ -52,6 +103,9 @@ class TCPSender {
 
     //! \brief Generate an empty-payload segment (useful for creating empty ACK segments)
     void send_empty_segment();
+
+    // 发送报文段
+    void send_segment(std::string &&data, bool syn = false, bool fin = false);
 
     //! \brief create and send segments to fill as much of the window as possible
     void fill_window();
