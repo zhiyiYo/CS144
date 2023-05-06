@@ -46,7 +46,7 @@ bool TCPReceiver::segment_received(const TCPSegment &seg) {
     uint64_t index = _checkpoint - 1;
 
     // 窗口右边界
-    uint64_t unaccept_index = window_size() + _reassembler.next_index();
+    uint64_t unaccept_index = max(window_size(), 1UL) + _reassembler.next_index();
 
     // 序列号不能落在窗口外
     if (seg_len + index <= _reassembler.next_index() || index >= unaccept_index)

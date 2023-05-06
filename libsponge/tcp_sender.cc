@@ -2,6 +2,7 @@
 
 #include "tcp_config.hh"
 
+#include <iostream>
 #include <random>
 
 // Dummy implementation of a TCP sender
@@ -63,16 +64,18 @@ void TCPSender::fill_window() {
 bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_size) {
     auto ack_seq = unwrap(ackno, _isn, _ack_seq);
 
-    if (ack_seq == 0)
-        return true;
-
     // absolute ackno 不能落在窗口外
-    if (_is_syned && ack_seq > _next_seqno)
+    if (ack_seq > _next_seqno)
         return false;
 
-    _is_syned = true;
     _window_size = window_size;
+
+    // 忽略已处理过的确认应答号
+    if (ack_seq <= _ack_seq)
+        return true;
+
     _ack_seq = ack_seq;
+    _is_syned = true;
 
     // 重置超时时间为初始值
     _timer.set_time_out(_initial_retransmission_timeout);
@@ -106,6 +109,10 @@ void TCPSender::tick(const size_t ms_since_last_tick) {
 
     if (!_timer.is_time_out())
         return;
+
+    if (_outstand_segments.empty()) {
+        return _timer.set_time_out(_initial_retransmission_timeout);
+    }
 
     // 超时需要重发第一个报文段，同时将超时时间翻倍
     _segments_out.push(_outstand_segments.front().first);

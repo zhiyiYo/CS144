@@ -1,4 +1,4 @@
-#include "socket.hh"
+#include "tcp_sponge_socket.hh"
 #include "util.hh"
 
 #include <cstdlib>
@@ -7,7 +7,7 @@
 using namespace std;
 
 void get_URL(const string &host, const string &path) {
-    TCPSocket socket;
+    CS144TCPSocket socket;
 
     // 连接到 Web 服务器
     socket.connect(Address(host, "http"));
@@ -25,7 +25,7 @@ void get_URL(const string &host, const string &path) {
     }
 
     // 关闭 socket
-    socket.close();
+    socket.wait_until_closed();
 }
 
 int main(int argc, char *argv[]) {
